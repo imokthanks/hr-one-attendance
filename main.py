@@ -2,12 +2,15 @@ import requests
 import json
 from datetime import datetime
 from dotenv import load_dotenv
+import pytz
 
 load_dotenv()
 
 USERNAME = "9398455869"
 PASSWORD = "Imokthanks@123"
 EMPLOYEE_ID = "451"
+
+ist = pytz.timezone("Asia/kolkata")
 
 
 def get_access_token(username: str, password: str):
@@ -34,7 +37,7 @@ def get_access_token(username: str, password: str):
 
 def mark_attendance(token, employee_id):
     url = "https://app.hrone.cloud/api/timeoffice/mobile/checkin/Attendance/Request"
-    now = datetime.now()
+    now = datetime.now(ist)
     punch_time = now.strftime("%Y-%m-%dT%H:%M")
 
     payload = {
@@ -75,8 +78,8 @@ def check_holiday(token: str, employee_id: int) -> bool:
 
     payload = json.dumps(
         {
-            "attendanceYear": datetime.now().year,
-            "attendanceMonth": datetime.now().month,
+            "attendanceYear": datetime.now(ist).year,
+            "attendanceMonth": datetime.now(ist).month,
             "employeeId": employee_id,
             "calendarViewType": "C",
         }
@@ -87,7 +90,7 @@ def check_holiday(token: str, employee_id: int) -> bool:
         "content-type": "application/json",
         "domaincode": "handyonline",
     }
-    today = datetime.now().date()
+    today = datetime.now(ist).date()
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         data = response.json()
@@ -135,7 +138,7 @@ def check_leave(token: str):
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         data = response.json()
-        today = datetime.now().date()
+        today = datetime.now(ist).date()
         if data and isinstance(data, list):
             for item in data:
                 data_unparsed = item.get("requestSubjectSectionTwo")
