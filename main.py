@@ -1,4 +1,3 @@
-import os
 import requests
 import json
 from datetime import datetime
@@ -6,9 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-USERNAME = os.getenv("HRONE_USERNAME")
-PASSWORD = os.getenv("HRONE_PASSWORD")
-EMPLOYEE_ID = os.getenv("EMPLOYEE_ID")
+USERNAME = "9398455869"
+PASSWORD = "Imokthanks@123"
+EMPLOYEE_ID = "451"
 
 
 def get_access_token(username: str, password: str):
