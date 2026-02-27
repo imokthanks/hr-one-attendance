@@ -1,4 +1,4 @@
-# Attendance_HRONE
+# Attendance
 
 Automatically mark attendance everyday on your behalf using GitHub Actions. This script automates the process of marking attendance in HROne system by running twice daily at configured times.
 
