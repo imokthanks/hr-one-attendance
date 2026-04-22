@@ -34,7 +34,6 @@ def get_access_token(username: str, password: str):
         
         # Set the access token as JwtTokenCookie
         session.cookies.set("JwtTokenCookie", access_token, domain=".hrone.cloud")
-        print(f"JWT cookie set: JwtTokenCookie={access_token[:20]}...")
         return session
     else:
         print("Login failed:", response.status_code, response.text)
