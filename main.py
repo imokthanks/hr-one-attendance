@@ -14,28 +14,34 @@ ist = pytz.timezone("Asia/kolkata")
 
 
 def get_access_token(username: str, password: str):
+    """Login and return session with JWT cookie"""
+    session = requests.Session()
     url = "https://gateway.hrone.cloud/oauth2/token"
     payload = f"username={username}&password={password}&grant_type=password&loginType=1&companyDomainCode=popcornapps&isUpdated=0&validSource=Y&deviceName=MS-Edge-Chromium-windows-10"
 
     headers = {
         "accept": "application/json, text/plain, */*",
-        "authorization": "Bearer",
         "content-type": "application/x-www-form-urlencoded",
         "domaincode": "popcornapps",
     }
 
-    response = requests.post(url, headers=headers, data=payload)
+    response = session.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         data = response.json()
         user = data.get("userName")
+        access_token = data.get("access_token")
         print(f"login successful for username: {user}")
-        return data.get("access_token")
+        
+        # Set the access token as JwtTokenCookie
+        session.cookies.set("JwtTokenCookie", access_token, domain=".hrone.cloud")
+        print(f"JWT cookie set: JwtTokenCookie={access_token[:20]}...")
+        return session
     else:
         print("Login failed:", response.status_code, response.text)
         return None
 
 
-def mark_attendance(token, employee_id):
+def mark_attendance(session, employee_id):
     url = "https://app.hrone.cloud/api/timeoffice/mobile/checkin/Attendance/Request"
     now = datetime.now(ist)
     punch_time = now.strftime("%Y-%m-%dT%H:%M")
@@ -60,12 +66,11 @@ def mark_attendance(token, employee_id):
 
     headers = {
         "accept": "application/json, text/plain, */*",
-        "authorization": f"Bearer {token}",
         "content-type": "application/json",
         "domaincode": "popcornapps",
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = session.post(url, headers=headers, data=json.dumps(payload))
     if response.status_code == 200:
         print(f"Attendance marked successfully for {employee_id} at {punch_time}")
         print(response.json())
@@ -73,7 +78,7 @@ def mark_attendance(token, employee_id):
         print("Attendance failed:", response.status_code, response.text)
 
 
-def check_holiday(token: str, employee_id: int) -> bool:
+def check_holiday(session: requests.Session, employee_id: int) -> bool:
     url = "https://app.hrone.cloud/api/timeoffice/attendance/Calendar"
 
     payload = json.dumps(
@@ -86,12 +91,11 @@ def check_holiday(token: str, employee_id: int) -> bool:
     )
     headers = {
         "accept": "application/json, text/plain, */*",
-        "authorization": f"Bearer {token}",
         "content-type": "application/json",
         "domaincode": "handyonline",
     }
     today = datetime.now(ist).date()
-    response = requests.post(url, headers=headers, data=payload)
+    response = session.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         data = response.json()
         if (
@@ -112,7 +116,7 @@ def check_holiday(token: str, employee_id: int) -> bool:
         return False
 
 
-def check_leave(token: str):
+def check_leave(session: requests.Session):
     url = "https://app.hrone.cloud/api/Request/InboxRequest/Search"
 
     payload = json.dumps(
@@ -131,11 +135,10 @@ def check_leave(token: str):
 
     headers = {
         "accept": "application/json, text/plain, */*",
-        "authorization": f"Bearer {token}",
         "content-type": "application/json",
         "domaincode": "handyonline",
     }
-    response = requests.post(url, headers=headers, data=payload)
+    response = session.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         data = response.json()
         today = datetime.now(ist).date()
@@ -163,14 +166,14 @@ if __name__ == "__main__":
         print("Please provide all required environment variables.")
         exit(1)
     print(f"Processing for {USERNAME} with employee ID {EMPLOYEE_ID}")
-    token = get_access_token(USERNAME, PASSWORD)
-    if token:
-        if not check_holiday(token, EMPLOYEE_ID):
-            if not check_leave(token):
-                mark_attendance(token, EMPLOYEE_ID)
+    session = get_access_token(USERNAME, PASSWORD)
+    if session:
+        if not check_holiday(session, EMPLOYEE_ID):
+            if not check_leave(session):
+                mark_attendance(session, EMPLOYEE_ID)
             else:
                 print("Leave request found, skipping attendance marking.")
         else:
             print("Today is a holiday or weekend, skipping attendance marking.")
     else:
-        print(f"Failed to get access token for {USERNAME}")
+        print(f"Failed to authenticate for {USERNAME}")
