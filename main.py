@@ -13,6 +13,9 @@ ist = pytz.timezone("Asia/kolkata")
 
 def get_punch_time() -> str:
     override = os.environ.get("PUNCH_TIME", "").strip()
+    print("Username", USERNAME)
+    print("PASSWORD", PASSWORD)
+    print("EMPLOYEE_ID", EMPLOYEE_ID)
     if override:
         return override
     now_ist = datetime.now(ist)
