@@ -4,18 +4,15 @@ import os
 from datetime import datetime
 import pytz
 
-USERNAME = os.environ.get("HRONE_USERNAME")
-PASSWORD = os.environ.get("HRONE_PASSWORD")
-EMPLOYEE_ID = os.environ.get("EMPLOYEE_ID")
+USERNAME = "9398455869"
+PASSWORD = "Imokthanks@123"
+EMPLOYEE_ID = "451"
 
 ist = pytz.timezone("Asia/kolkata")
 
 
 def get_punch_time() -> str:
     override = os.environ.get("PUNCH_TIME", "").strip()
-    print("Username", USERNAME)
-    print("PASSWORD", PASSWORD)
-    print("EMPLOYEE_ID", EMPLOYEE_ID)
     if override:
         return override
     now_ist = datetime.now(ist)
