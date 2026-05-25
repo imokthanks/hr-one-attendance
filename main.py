@@ -2,10 +2,7 @@ import requests
 import json
 import os
 from datetime import datetime
-from dotenv import load_dotenv
 import pytz
-
-load_dotenv()
 
 USERNAME = os.environ.get("HRONE_USERNAME")
 PASSWORD = os.environ.get("HRONE_PASSWORD")
