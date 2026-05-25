@@ -1,16 +1,29 @@
 import requests
 import json
+import os
 from datetime import datetime
 from dotenv import load_dotenv
 import pytz
 
 load_dotenv()
 
-USERNAME = "9398455869"
-PASSWORD = "Imokthanks@123"
-EMPLOYEE_ID = "451"
+USERNAME = os.environ.get("HRONE_USERNAME")
+PASSWORD = os.environ.get("HRONE_PASSWORD")
+EMPLOYEE_ID = os.environ.get("EMPLOYEE_ID")
 
 ist = pytz.timezone("Asia/kolkata")
+
+
+def get_punch_time() -> str:
+    override = os.environ.get("PUNCH_TIME", "").strip()
+    if override:
+        return override
+    now_ist = datetime.now(ist)
+    if now_ist.hour < 12:
+        fixed_time = now_ist.replace(hour=9, minute=30, second=0, microsecond=0)
+    else:
+        fixed_time = now_ist.replace(hour=18, minute=30, second=0, microsecond=0)
+    return fixed_time.strftime("%Y-%m-%dT%H:%M")
 
 
 def get_access_token(username: str, password: str):
@@ -42,8 +55,7 @@ def get_access_token(username: str, password: str):
 
 def mark_attendance(session, employee_id):
     url = "https://app.hrone.cloud/api/timeoffice/mobile/checkin/Attendance/Request"
-    now = datetime.now(ist)
-    punch_time = now.strftime("%Y-%m-%dT%H:%M")
+    punch_time = get_punch_time()
 
     payload = {
         "requestType": "A",
