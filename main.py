@@ -16,11 +16,11 @@ def get_punch_time() -> str:
     if override:
         return override
     now_ist = datetime.now(ist)
-    if now_ist.hour < 12:
-        fixed_time = now_ist.replace(hour=9, minute=30, second=0, microsecond=0)
-    else:
-        fixed_time = now_ist.replace(hour=18, minute=30, second=0, microsecond=0)
-    return fixed_time.strftime("%Y-%m-%dT%H:%M")
+    # if now_ist.hour < 12:
+    #     fixed_time = now_ist.replace(hour=9, minute=30, second=0, microsecond=0)
+    # else:
+    #     fixed_time = now_ist.replace(hour=18, minute=30, second=0, microsecond=0)
+    return now_ist.strftime("%Y-%m-%dT%H:%M")
 
 
 def get_access_token(username: str, password: str):
