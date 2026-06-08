@@ -2,8 +2,8 @@ name: HROne Attendance
 
 on:
   schedule:
-    - cron: '0 4 * * *'    # 9:30 AM IST
-    - cron: '0 13 * * *'   # 6:30 PM IST
+    - cron: '0 0 * * *'    # 9:30 AM IST
+    - cron: '0 9 * * *'   # 6:30 PM IST
   workflow_dispatch:
     inputs:
       punch_time:
