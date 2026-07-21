@@ -4,9 +4,9 @@ import os
 from datetime import datetime
 import pytz
 
-USERNAME = "9398455869"
-PASSWORD = "Imokthanks@123"
-EMPLOYEE_ID = "451"
+USERNAME = os.environ.get("HRONE_USERNAME", "")
+PASSWORD = os.environ.get("HRONE_PASSWORD", "")
+EMPLOYEE_ID = os.environ.get("EMPLOYEE_ID", "")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "dharahas-attendance-hrone")
 
 ist = pytz.timezone("Asia/kolkata")
