@@ -2,12 +2,12 @@ name: HROne Attendance
 
 on:
   schedule:
-    - cron: '0 0 * * *'    # 9:30 AM IST
-    - cron: '0 9 * * *'   # 6:30 PM IST
+    - cron: "0 1 * * *"
+    - cron: "0 10 * * *"
   workflow_dispatch:
     inputs:
       punch_time:
-        description: 'Override punch time (YYYY-MM-DDTHH:MM, IST)'
+        description: "Override punch time (YYYY-MM-DDTHH:MM, IST)"
         required: false
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
