@@ -17,7 +17,7 @@ def notify(title: str, message: str, priority: str = "default", tags: str = ""):
         headers = {"Title": title, "Priority": priority}
         if tags:
             headers["Tags"] = tags
-        requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", data=message, headers=headers)
+        requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", data=message.encode("utf-8"), headers=headers)
     except Exception as e:
         print(f"Notification failed: {e}")
 
@@ -93,10 +93,10 @@ def mark_attendance(session, employee_id):
     if response.status_code == 200:
         print(f"Attendance marked successfully for {employee_id} at {punch_time}")
         print(response.json())
-        notify("Attendance Marked ✅", f"Punched at {punch_time}", tags="white_check_mark")
+        notify("Attendance Marked", f"Punched at {punch_time}", tags="white_check_mark")
     else:
         print("Attendance failed:", response.status_code, response.text)
-        notify("Attendance Failed ❌", f"Error {response.status_code}: {response.text[:200]}", priority="high", tags="x")
+        notify("Attendance Failed", f"Error {response.status_code}: {response.text[:200]}", priority="high", tags="x")
 
 
 def check_holiday(session: requests.Session, employee_id: int) -> bool:
@@ -200,4 +200,4 @@ if __name__ == "__main__":
             notify("Attendance Skipped", "Today is a holiday or weekend", tags="calendar")
     else:
         print(f"Failed to authenticate for {USERNAME}")
-        notify("Attendance Failed ❌", "Login to HROne failed", priority="high", tags="x")
+        notify("Attendance Failed", "Login to HROne failed", priority="high", tags="x")
