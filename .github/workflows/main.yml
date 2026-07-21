@@ -32,4 +32,5 @@ jobs:
           HRONE_PASSWORD: ${{ secrets.HRONE_PASSWORD }}
           EMPLOYEE_ID: ${{ secrets.EMPLOYEE_ID }}
           PUNCH_TIME: ${{ inputs.punch_time }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python main.py

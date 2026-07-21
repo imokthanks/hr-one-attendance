@@ -7,8 +7,19 @@ import pytz
 USERNAME = "9398455869"
 PASSWORD = "Imokthanks@123"
 EMPLOYEE_ID = "451"
+NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "dharahas-attendance-hrone")
 
 ist = pytz.timezone("Asia/kolkata")
+
+
+def notify(title: str, message: str, priority: str = "default", tags: str = ""):
+    try:
+        headers = {"Title": title, "Priority": priority}
+        if tags:
+            headers["Tags"] = tags
+        requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", data=message, headers=headers)
+    except Exception as e:
+        print(f"Notification failed: {e}")
 
 
 def get_punch_time() -> str:
@@ -82,8 +93,10 @@ def mark_attendance(session, employee_id):
     if response.status_code == 200:
         print(f"Attendance marked successfully for {employee_id} at {punch_time}")
         print(response.json())
+        notify("Attendance Marked ✅", f"Punched at {punch_time}", tags="white_check_mark")
     else:
         print("Attendance failed:", response.status_code, response.text)
+        notify("Attendance Failed ❌", f"Error {response.status_code}: {response.text[:200]}", priority="high", tags="x")
 
 
 def check_holiday(session: requests.Session, employee_id: int) -> bool:
@@ -181,7 +194,10 @@ if __name__ == "__main__":
                 mark_attendance(session, EMPLOYEE_ID)
             else:
                 print("Leave request found, skipping attendance marking.")
+                notify("Attendance Skipped", "Leave request found for today", tags="palm_tree")
         else:
             print("Today is a holiday or weekend, skipping attendance marking.")
+            notify("Attendance Skipped", "Today is a holiday or weekend", tags="calendar")
     else:
         print(f"Failed to authenticate for {USERNAME}")
+        notify("Attendance Failed ❌", "Login to HROne failed", priority="high", tags="x")
