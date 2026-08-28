@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-from datetime import datetime
+from datetime import datetime, time
 import pytz
 
 USERNAME = os.environ.get("HRONE_USERNAME", "")
@@ -22,7 +22,7 @@ def notify(title: str, message: str, priority: str = "default", tags: str = ""):
         print(f"Notification failed: {e}")
 
 
-def get_punch_time() -> str:
+def get_punch_time() -> datetime:
     override = os.environ.get("PUNCH_TIME", "").strip()
     if override:
         return override
@@ -31,7 +31,7 @@ def get_punch_time() -> str:
     #     fixed_time = now_ist.replace(hour=9, minute=30, second=0, microsecond=0)
     # else:
     #     fixed_time = now_ist.replace(hour=18, minute=30, second=0, microsecond=0)
-    return now_ist.strftime("%Y-%m-%dT%H:%M")
+    return now_ist
 
 
 def get_access_token(username: str, password: str):
@@ -60,10 +60,26 @@ def get_access_token(username: str, password: str):
         print("Login failed:", response.status_code, response.text)
         return None
 
+def within_limits(punch_time: datetime):
+    if (
+        time(9, 0) <= punch_time.time() <= time(10, 0)
+        or
+        time(18, 0) <= punch_time.time() <= time(19, 0)
+    ):
+        return True
+    return False
+
+
+
 
 def mark_attendance(session, employee_id):
     url = "https://app.hrone.cloud/api/timeoffice/mobile/checkin/Attendance/Request"
     punch_time = get_punch_time()
+    if (not within_limits(punch_time)):
+        print(f"Attendance not within limits, attempted to punch at {punch_time.strftime("%Y-%m-%dT%H:%M")}")
+        notify("Attendance not within limits", f"Attempted to punch at {punch_time.strftime("%Y-%m-%dT%H:%M")}", priority="high", tags="x")
+        return
+    punch_time = punch_time.strftime("%Y-%m-%dT%H:%M")
 
     payload = {
         "requestType": "A",
