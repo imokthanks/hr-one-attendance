@@ -3,6 +3,10 @@ import json
 import os
 from datetime import datetime, time
 import pytz
+import argparse
+# from dotenv import load_dotenv
+
+# load_dotenv()
 
 USERNAME = os.environ.get("HRONE_USERNAME", "")
 PASSWORD = os.environ.get("HRONE_PASSWORD", "")
@@ -70,12 +74,10 @@ def within_limits(punch_time: datetime):
     return False
 
 
-
-
-def mark_attendance(session, employee_id):
+def mark_attendance(session, employee_id, skip_limit_check: bool):
     url = "https://app.hrone.cloud/api/timeoffice/mobile/checkin/Attendance/Request"
     punch_time = get_punch_time()
-    if (not within_limits(punch_time)):
+    if (not skip_limit_check and not within_limits(punch_time)):
         print(f"Attendance not within limits, attempted to punch at {punch_time.strftime("%Y-%m-%dT%H:%M")}")
         notify("Attendance not within limits", f"Attempted to punch at {punch_time.strftime("%Y-%m-%dT%H:%M")}", priority="high", tags="x")
         return
@@ -197,17 +199,26 @@ def check_leave(session: requests.Session):
         print("No leave requests found")
         return False
 
+def should_skip_limit_check() -> bool:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--trigger", type=str)
+    trigger = parser.parse_args().trigger
+    return trigger == "workflow_dispatch"
+
 
 if __name__ == "__main__":
     if not USERNAME or not PASSWORD or not EMPLOYEE_ID:
         print("Please provide all required environment variables.")
         exit(1)
+
+    skip_limit_check = should_skip_limit_check()
+
     print(f"Processing for {USERNAME} with employee ID {EMPLOYEE_ID}")
     session = get_access_token(USERNAME, PASSWORD)
     if session:
         if not check_holiday(session, EMPLOYEE_ID):
             if not check_leave(session):
-                mark_attendance(session, EMPLOYEE_ID)
+                mark_attendance(session, EMPLOYEE_ID, skip_limit_check)
             else:
                 print("Leave request found, skipping attendance marking.")
                 notify("Attendance Skipped", "Leave request found for today", tags="palm_tree")

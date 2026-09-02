@@ -33,4 +33,4 @@ jobs:
           EMPLOYEE_ID: ${{ secrets.EMPLOYEE_ID }}
           PUNCH_TIME: ${{ inputs.punch_time }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: python main.py
+        run: python main.py --trigger ${{ github.event_name }}
